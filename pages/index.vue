@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { MoleculesTitle } from '#components';
+
+
+
+
+
+
 
 </script>
 
 <template>
-    <div>
-        <MoleculesTitle />
+    <div class="w-full h-full ">
+        <div class="max-w-[1300px] mx-auto px-4 gap-4">
+            <MoleculesTitle />
 
-        <MoleculesFilter />
-        <div class="flex w-[1200px] bg-amber-700 mx-auto">
             <OrganismsKanban />
         </div>
-
     </div>
 </template>
