@@ -1,10 +1,16 @@
+<script setup lang="ts">
+import { MoleculesTitle } from '#components';
+
+</script>
+
 <template>
     <div>
-        <h1>Minha Home</h1>
-        <p>Essa é a página principal.</p>
-        <OrganismsKanban />
-        <div class="p-8 text-center">
-            <h1 class="text-3xl font-bold text-blue-600">Olá, Tailwind 2025!</h1>
+        <MoleculesTitle />
+
+        <MoleculesFilter />
+        <div class="flex w-[1200px] bg-amber-700 mx-auto">
+            <OrganismsKanban />
         </div>
+
     </div>
 </template>

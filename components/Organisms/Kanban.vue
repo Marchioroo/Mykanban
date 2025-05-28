@@ -35,9 +35,9 @@ function onDragEnd(event: Event) {
 </script>
 
 <template>
-    <div class="flex gap-4">
-        <div v-for="(column) in columns" :key="column.id" class="bg-gray-100 p-2 rounded-md w-[250px]">
-            <h2 class="text-lg font-semibold mb-2">{{ column.name }}</h2>
+    <div class="flex gap-4 p-4">
+        <div v-for="(column) in columns" :key="column.id" class="bg-gray-100 p-2 rounded-md md:w-[380px]">
+            <h2 class="text-2xl font-semibold mb-2">{{ column.name }}</h2>
             <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[100px]" @end="onDragEnd">
                 <template #item="{ element }">
                     <div class="bg-white my-2 p-3 rounded cursor-grab select-none shadow-sm">
