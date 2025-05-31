@@ -1,35 +1,92 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable'
-import { useCardStore } from '~/stores/Cards';
-import type { Column } from "~/types/columnInterface";
+import { useCardStore } from '~/stores/Cards'
+import type { Column } from "~/types/columnInterface"
 
 const useCard = useCardStore()
 const columns = computed<Column[]>(() => useCard.columns)
 const searchTerm = ref('')
+const isLoading = ref<boolean>(true)
+const filteredItems = ref<Column[]>([])
+const showModalCard = ref(false);
+const cardInfo = computed(() => (useCard.taskSelected));
+console.log('cardInfo', cardInfo.value)
+
 function onDragEnd(event: Event) {
     console.log('Drag finalizado:', event)
 }
-// const filteredItems = computed(() => {
-//   if (!search.value) return columns.value;
-//   return columns.value.filter(column =>
-//     column.name.toLowerCase().includes(search.value.toLowerCase())
-//   );
-// });
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+watch([columns, searchTerm], () => {
+    if (debounceTimer) clearTimeout(debounceTimer)
+    isLoading.value = true
+
+    debounceTimer = setTimeout(() => {
+        const term = searchTerm.value.toLowerCase().trim()
+
+        if (!term) {
+            filteredItems.value = columns.value
+        } else {
+            filteredItems.value = columns.value
+                .map(col => ({
+                    ...col,
+                    tasks: col.tasks.filter(task =>
+                        task.title.toLowerCase().includes(term)
+                    ),
+                }))
+                .filter(col => col.tasks.length > 0)
+        }
+
+        isLoading.value = false
+    }, 400)
+}, { immediate: true })
+
 function handleSearch(value: string) {
     searchTerm.value = value;
     console.log('searchTerm.value', searchTerm.value)
+
 }
 
-onMounted(() => {
-    useCard.fetchCards();
+onMounted(async () => {
+    isLoading.value = true
+    await useCard.fetchCards()
+
 })
 
+const openModal = (id: number) => {
+    showModalCard.value = true;
+    useCard.findCardSelected(id);
+}
 </script>
 
+
 <template>
+    <MoleculesModalCardModal v-model="showModalCard">
+        <div class=" flex flex-row text-md  font-semibold mb-2 text-orange-400">
+            #{{ cardInfo?.id }} - Em progesso
+        </div>
+        <div class="flex flex-row w-full h-full font-semibold text-2xl items-center justify-between mb-6">
+            {{ cardInfo?.title }}
+            <!-- <AtomsIconsPen class="w-6 h-6 mt-1" /> -->
+        </div>
+
+        <div>
+            <div class="text font-medium mb-1 flex flex-row h-full w-full items-center justify-start gap-2">
+                <AtomsIconsDescription class="w-5 h-5 " />
+                <div class="font-semibold">Descrição</div>
+            </div>
+            <div>{{ cardInfo?.description }}</div>
+        </div>
+    </MoleculesModalCardModal>
+
+
     <MoleculesFilter @update:search="handleSearch" />
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 mx-auto mt-2">
-        <div v-for="(column) in columns" :key="column.id" class=" p-2 rounded-md">
+    <div v-if="isLoading" class="p-4">
+        <AtomsSpinner />
+    </div>
+    <div v-else-if="filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 mx-auto mt-2">
+        <div v-for="(column) in filteredItems" :key="column.id" class=" p-2 rounded-md">
             <h2 class="relative text-lg font-extrabold mb-2 ">
                 <div class="relative flex flex-row w-full h-full gap-2 items-center">
                     <!-- Bolinha com número -->
@@ -46,68 +103,93 @@ onMounted(() => {
                     </div>
                 </div>
             </h2>
+            <div>
+                <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[500px]" @end="onDragEnd"
+                    :animation="200">
+                    <template #item="{ element }">
+                        <div class=" bg-white my-2 p-4 min-h-[180px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4"
+                            @click="openModal(element.id)">
+                            <div class="text-[#EE6B42] font-bold"># {{ element.id }}</div>
 
-
-            <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[500px]" @end="onDragEnd"
-                :animation="200">
-                <template #item="{ element }">
-                    <div
-                        class="bg-white my-2 p-4 min-h-[180px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4">
-                        <div class="text-[#EE6B42] font-bold"># {{ element.id }}</div>
-
-                        <div class="flex flex-row justify-between items-start pt-2">
-                            <div class="flex-[0_0_90%] p-1 overflow-hidden font-semibold">
-                                {{ element.title }}
-                            </div>
-                            <div class="flex-[0_0_10%] flex p-2 justify-end items-start">
-                                <atoms-icons-dots />
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2 mt-2">
-                            <div v-for="(tag, index) in element.tags" :key="index"
-                                class="px-2 py-0.5 text-white rounded-2xl text-xs"
-                                :style="{ backgroundColor: tag.color }">
-                                {{ tag.title }}
-                            </div>
-                        </div>
-
-                        <div class="flex flex-row justify-between items-start pt-2">
-
-                            <div class="flex flex-row">
-                                <div v-for="index in Math.min(element.users, 2)" :key="index"
-                                    class="rounded-4xl border-2 border-[#FFF4F1] -ml-4 first:ml-0">
-                                    <NuxtImg src="/img/ImageDefault.png" class="w-10 h-10" />
+                            <div class="flex flex-row justify-between items-start pt-2">
+                                <div class="flex-[0_0_90%] p-1 overflow-hidden font-semibold">
+                                    {{ element.title }}
                                 </div>
-
-                                <div v-if="element.users > 2"
-                                    class="flex items-center -ml-4 justify-center w-11 h-11 bg-[#c9d4e6] rounded-3xl border-2 border-[#FFF4F1] text-[#36465F] font-semibold">
-                                    <p class="mr-1">+{{ element.users - 2 }}</p>
+                                <div class="flex-[0_0_10%] flex p-2 justify-end items-start">
+                                    <atoms-icons-dots />
                                 </div>
                             </div>
 
-                            <div class="flex flex-row mt-3 ">
-                                <div class="flex flex-row gap-1 items-center justify-center  ">
-                                    <AtomsIconsAnexo />
-                                    <span class="text-[#EE6B42] font-semibold">{{ element.users
-                                        }}</span>
-                                    <AtomsIconsComentario />
-                                    <span class="text-[#EE6B42] font-semibold">{{ element.users + 2
-                                        }}</span>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <div v-for="(tag, index) in element.tags" :key="index"
+                                    class="px-2 py-0.5 text-white rounded-2xl text-xs"
+                                    :style="{ backgroundColor: tag.color }">
+                                    {{ tag.title }}
                                 </div>
                             </div>
 
+                            <div class="flex flex-row justify-between items-start pt-2">
+
+                                <div class="flex flex-row">
+                                    <div v-for="index in Math.min(element.users, 2)" :key="index"
+                                        class="rounded-4xl border-2 border-[#FFF4F1] -ml-4 first:ml-0">
+                                        <NuxtImg src="/img/ImageDefault.png" class="w-10 h-10" />
+                                    </div>
+
+                                    <div v-if="element.users > 2"
+                                        class="flex items-center -ml-4 justify-center w-11 h-11 bg-[#c9d4e6] rounded-3xl border-2 border-[#FFF4F1] text-[#36465F] font-semibold">
+                                        <p class="mr-1">+{{ element.users - 2 }}</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-row mt-3 ">
+                                    <div class="flex flex-row gap-1 items-center justify-center  ">
+                                        <AtomsIconsAnexo />
+                                        <span class="text-[#EE6B42] font-semibold">{{ element.users
+                                            }}</span>
+                                        <AtomsIconsComentario />
+                                        <span class="text-[#EE6B42] font-semibold">{{ element.users + 2
+                                            }}</span>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
-                    </div>
-                </template>
-            </draggable>
+                    </template>
+                </draggable>
+            </div>
         </div>
     </div>
+    <div v-else>
+        <div class="flex flex-col items-center justify-center p-4">
+            <div class="text-lg">Nenhum conteudo encontrado</div>
+            <div>
+                <NuxtImg src="/img/kanbanlogo.png" class="w-25 h-25" />
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Nao irei usar no momento mas quem sabe mais pra frente -->
+    <!-- <div v-if="filteredItems.length === 0">
+        <div class="!w-full flex mx-auto text-lg  items-center justify-center flex-col">
+            <p>Nenhum conteúdo encontrado!</p>
+
+            <div class="rounded-4xl border-2 border-[#FFF4F1] -ml-4 first:ml-0">
+                <NuxtImg src="/img/kanbanlogo.png" class="w-25 h-25" />
+            </div>
+        </div>
+    </div> -->
 </template>
 
 <style>
 body {
     font-family: 'Chillax', sans-serif;
 
+}
+
+.card {
+    background-image: aliceblue;
+    z-index: 20;
 }
 </style>

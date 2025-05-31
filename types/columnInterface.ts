@@ -6,7 +6,9 @@ export interface Tag {
 export interface Task {
   id: number;
   title: string;
-  tags: Tag[];
+  description: string;
+  date: string;
+  tags: { title: string; color: string }[];
   users: number;
 }
 
