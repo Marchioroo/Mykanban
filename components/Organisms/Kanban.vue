@@ -10,12 +10,6 @@ const isLoading = ref<boolean>(true)
 const filteredItems = ref<Column[]>([])
 const showModalCard = ref(false);
 const cardInfo = computed(() => (useCard.taskSelected));
-console.log('cardInfo', cardInfo.value)
-
-function onDragEnd(event: Event) {
-    console.log('Drag finalizado:', event)
-}
-
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch([columns, searchTerm], () => {
@@ -42,51 +36,42 @@ watch([columns, searchTerm], () => {
     }, 400)
 }, { immediate: true })
 
+function onDragEnd(event: Event) {
+    console.log('Drag finalizado:', event)
+}
+
 function handleSearch(value: string) {
     searchTerm.value = value;
     console.log('searchTerm.value', searchTerm.value)
 
 }
 
-onMounted(async () => {
-    isLoading.value = true
-    await useCard.fetchCards()
-
-})
-
 const openModal = (id: number) => {
     showModalCard.value = true;
     useCard.findCardSelected(id);
 }
+
+const handleCloseModal = (val: boolean) => {
+    showModalCard.value = val;
+};
+
+const createTask = (val: String) => {
+    console.log('valor', val)
+}
+onMounted(async () => {
+    isLoading.value = true
+    await useCard.fetchCards()
+})
 </script>
-
-
 <template>
-    <MoleculesModalCardModal v-model="showModalCard">
-        <div class=" flex flex-row text-md  font-semibold mb-2 text-orange-400">
-            #{{ cardInfo?.id }} - Em progesso
-        </div>
-        <div class="flex flex-row w-full h-full font-semibold text-2xl items-center justify-between mb-6">
-            {{ cardInfo?.title }}
-            <!-- <AtomsIconsPen class="w-6 h-6 mt-1" /> -->
-        </div>
-
-        <div>
-            <div class="text font-medium mb-1 flex flex-row h-full w-full items-center justify-start gap-2">
-                <AtomsIconsDescription class="w-5 h-5 " />
-                <div class="font-semibold">Descrição</div>
-            </div>
-            <div>{{ cardInfo?.description }}</div>
-        </div>
-    </MoleculesModalCardModal>
-
-
+    <MoleculesModalCardModal v-model="showModalCard" @closeModal="handleCloseModal" />
     <MoleculesFilter @update:search="handleSearch" />
+
     <div v-if="isLoading" class="p-4">
         <AtomsSpinner />
     </div>
     <div v-else-if="filteredItems.length > 0" class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 mx-auto mt-2">
-        <div v-for="(column) in filteredItems" :key="column.id" class=" p-2 rounded-md">
+        <div v-for="(column) in filteredItems" :key="column.id" class=" p-2 rounded-md ">
             <h2 class="relative text-lg font-extrabold mb-2 ">
                 <div class="relative flex flex-row w-full h-full gap-2 items-center">
                     <!-- Bolinha com número -->
@@ -98,16 +83,16 @@ const openModal = (id: number) => {
                     </span>
 
                     <!-- Ícone no canto direito -->
-                    <div class="absolute right-0">
+                    <div class="absolute right-0 cursor-pointer">
                         <atoms-icons-dots />
                     </div>
                 </div>
             </h2>
             <div>
-                <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[500px]" @end="onDragEnd"
+                <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[430px] " @end="onDragEnd"
                     :animation="200">
                     <template #item="{ element }">
-                        <div class=" bg-white my-2 p-4 min-h-[180px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4"
+                        <div class=" relative bg-white my-2 p-4 min-h-[200px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4 shadow-md"
                             @click="openModal(element.id)">
                             <div class="text-[#EE6B42] font-bold"># {{ element.id }}</div>
 
@@ -115,12 +100,9 @@ const openModal = (id: number) => {
                                 <div class="flex-[0_0_90%] p-1 overflow-hidden font-semibold">
                                     {{ element.title }}
                                 </div>
-                                <div class="flex-[0_0_10%] flex p-2 justify-end items-start">
-                                    <atoms-icons-dots />
-                                </div>
                             </div>
 
-                            <div class="flex flex-wrap gap-2 mt-2">
+                            <div class="absolute flex flex-wrap gap-2 mt-2 bottom-17">
                                 <div v-for="(tag, index) in element.tags" :key="index"
                                     class="px-2 py-0.5 text-white rounded-2xl text-xs"
                                     :style="{ backgroundColor: tag.color }">
@@ -128,9 +110,8 @@ const openModal = (id: number) => {
                                 </div>
                             </div>
 
-                            <div class="flex flex-row justify-between items-start pt-2">
-
-                                <div class="flex flex-row">
+                            <div class="flex flex-row w-full justify-between items-start pt-2 absolute bottom-3 ">
+                                <div class="flex flex-row  ">
                                     <div v-for="index in Math.min(element.users, 2)" :key="index"
                                         class="rounded-4xl border-2 border-[#FFF4F1] -ml-4 first:ml-0">
                                         <NuxtImg src="/img/ImageDefault.png" class="w-10 h-10" />
@@ -142,7 +123,7 @@ const openModal = (id: number) => {
                                     </div>
                                 </div>
 
-                                <div class="flex flex-row mt-3 ">
+                                <div class="flex flex-row mt-3 mr-8 ">
                                     <div class="flex flex-row gap-1 items-center justify-center  ">
                                         <AtomsIconsAnexo />
                                         <span class="text-[#EE6B42] font-semibold">{{ element.users
@@ -152,12 +133,21 @@ const openModal = (id: number) => {
                                             }}</span>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </template>
+
+
                 </draggable>
+                <div class="w-full h-full pt-2">
+                    <div>
+                        <span class="flex flex-row items-center justify-center">
+                            <AtomsIconsAddCard class="w-13 h-13 cursor-pointer" @click="createTask(column.name)" />
+                        </span>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
     <div v-else>

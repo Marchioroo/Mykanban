@@ -14,7 +14,7 @@ const props = defineProps({
 
 </script>
 <template>
-    <button class="px-5 py-2 bg-[#36465F] text-white rounded-lg transition-all outline-none hover:bg-[#5d697c]">
+    <button class="px-5 py-2 bg-[#515763] text-white rounded-lg transition-all outline-none hover:bg-[#5d697c]">
         <div class="flex items-center justify-center">
             <div v-if="props.filter">
                 <AtomsIconsFilter class="w-5 h-5 inline-block mr-2 mb-0.5" />
