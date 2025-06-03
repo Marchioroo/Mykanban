@@ -9,7 +9,8 @@ const searchTerm = ref('')
 const isLoading = ref<boolean>(true)
 const filteredItems = ref<Column[]>([])
 const showModalCard = ref(false);
-const cardInfo = computed(() => (useCard.taskSelected));
+const isCreateTask = ref(false)
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch([columns, searchTerm], () => {
@@ -57,6 +58,7 @@ const handleCloseModal = (val: boolean) => {
 
 const createTask = (val: String) => {
     console.log('valor', val)
+    isCreateTask.value = true
 }
 onMounted(async () => {
     isLoading.value = true
@@ -66,6 +68,7 @@ onMounted(async () => {
 <template>
     <MoleculesModalCardModal v-model="showModalCard" @closeModal="handleCloseModal" />
     <MoleculesFilter @update:search="handleSearch" />
+    <MoleculesModalCreateTask v-model="isCreateTask" />
 
     <div v-if="isLoading" class="p-4">
         <AtomsSpinner />
@@ -89,8 +92,21 @@ onMounted(async () => {
                 </div>
             </h2>
             <div>
-                <draggable v-model="column.tasks" group="tasks" item-key="id" class="min-h-[430px] " @end="onDragEnd"
-                    :animation="200">
+                <div class="w-full h-full pt-2">
+                    <div>
+                        <span class="flex flex-row items-center justify-center">
+
+                            <div @click="createTask(column.name)"
+                                class="w-full h-[40px] bg-gray-200 flex flex-row items-center justify-center gap-2 rounded-xl cursor-pointer hover:bg-gray-300 transition-all">
+                                <span class="text-xl text-gray-700 font-semibold"> + </span>
+                                <span class=" font-semibold text-gray-700"> Nova task
+                                </span>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+                <draggable v-model="column.tasks" group="tasks" item-key="id" class="h-auto min-h-[300px] "
+                    @end="onDragEnd" :animation="200">
                     <template #item="{ element }">
                         <div class=" relative bg-white my-2 p-4 min-h-[200px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4 shadow-md"
                             @click="openModal(element.id)">
@@ -127,10 +143,10 @@ onMounted(async () => {
                                     <div class="flex flex-row gap-1 items-center justify-center  ">
                                         <AtomsIconsAnexo />
                                         <span class="text-[#EE6B42] font-semibold">{{ element.users
-                                            }}</span>
+                                        }}</span>
                                         <AtomsIconsComentario />
                                         <span class="text-[#EE6B42] font-semibold">{{ element.users + 2
-                                            }}</span>
+                                        }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -139,20 +155,13 @@ onMounted(async () => {
 
 
                 </draggable>
-                <div class="w-full h-full pt-2">
-                    <div>
-                        <span class="flex flex-row items-center justify-center">
-                            <AtomsIconsAddCard class="w-13 h-13 cursor-pointer" @click="createTask(column.name)" />
-                        </span>
-                    </div>
-                </div>
             </div>
 
         </div>
     </div>
     <div v-else>
         <div class="flex flex-col items-center justify-center p-4">
-            <div class="text-lg">Nenhum conteudo encontrado</div>
+            <div class="text-lg">Nenhum conteudo encontrado</div>npm
             <div>
                 <NuxtImg src="/img/kanbanlogo.png" class="w-25 h-25" />
             </div>

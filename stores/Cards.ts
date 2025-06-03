@@ -22,7 +22,7 @@ export const useCardStore = defineStore("card", {
               date: "2025-06-01",
               tags: [
                 { title: "Setup", color: "#4CAF50" },
-                { title: "Designe", color: "#FF9800" },
+                { title: "Design", color: "#FF9800" },
               ],
               users: 1,
               comments: [
@@ -233,11 +233,13 @@ export const useCardStore = defineStore("card", {
 
       return this.columns;
     },
+
     async findCardSelected(id: number) {
       this.taskSelected = this.columns
         .flatMap((column) => column.tasks)
         .find((task) => task.id === id);
     },
+
     async updateTask(taskSelected: Task) {
       this.columns.forEach((column) => {
         column.tasks.forEach((task) => {
@@ -250,5 +252,6 @@ export const useCardStore = defineStore("card", {
         });
       });
     },
+    async createTask() {},
   },
 });

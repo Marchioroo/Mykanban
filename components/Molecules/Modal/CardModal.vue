@@ -23,6 +23,7 @@ const model = ref(false)
 
 const saveChanges = () => {
     isConfirmSave.value = true
+
 };
 
 const closeModal = () => {
