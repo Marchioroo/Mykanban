@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "nuxt-tiptap-editor",
     "nuxt-tiptap-editor",
   ],
+  css: ["v-calendar/style.css"],
   tiptap: {
     prefix: "Tiptap", // Prefixo para os componentes do Tiptap
   },

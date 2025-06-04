@@ -110,7 +110,7 @@ watch(cardInfo, (newCard) => {
                     </div>
                     <div class="flex flex-wrap gap-2">
                         <div class="px-2 py-0.5 text-black rounded-2xl text-md font-extrabold">
-                            {{ formatterData(cardInfo?.date) }}
+                            {{ formatterDataSimple(cardInfo?.date) }}
                         </div>
                     </div>
                 </div>

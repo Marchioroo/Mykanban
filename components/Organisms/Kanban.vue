@@ -54,12 +54,13 @@ const openModal = (id: number) => {
 
 const handleCloseModal = (val: boolean) => {
     showModalCard.value = val;
+    isCreateTask.value = val
 };
 
 const createTask = (val: String) => {
-    console.log('valor', val)
     isCreateTask.value = true
 }
+
 onMounted(async () => {
     isLoading.value = true
     await useCard.fetchCards()
@@ -68,7 +69,7 @@ onMounted(async () => {
 <template>
     <MoleculesModalCardModal v-model="showModalCard" @closeModal="handleCloseModal" />
     <MoleculesFilter @update:search="handleSearch" />
-    <MoleculesModalCreateTask v-model="isCreateTask" />
+    <MoleculesModalCreateTask v-model="isCreateTask" @closeModalCreateTask="handleCloseModal" />
 
     <div v-if="isLoading" class="p-4">
         <AtomsSpinner />
