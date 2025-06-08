@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useCardStore } from '~/stores/Cards';
 import type { Task } from '~/types/columnInterface';
 import type { TagWithColor, DropdownItem, TagsName } from '~/types/TagsInterface';
 import { formSchema } from '~/utils/validators';
@@ -9,8 +10,11 @@ const props = defineProps({
         type: Boolean
     }
 })
+const cardStore = useCardStore();
 const title = ref('')
+const modalValidate = ref(false)
 const description = ref('')
+const isLoading = ref(false)
 const date = ref<Date>(new Date());
 const dataFormatada = computed(() => formatterData(date.value));
 const errors = ref<Record<string, string>>({});
@@ -24,38 +28,52 @@ const togglePopover = (event: Event) => {
 };
 
 const formData = computed<Task>(() => ({
-    id: 1,
+    id: Number(cardStore.idValueInfoCard + 1),
     title: title.value,
     description: description.value,
     date: dataFormatada.value,
-    tags: selectedTags.value
+    tags: selectedTags.value,
+    users: 1
 }));
 
 const validateForm = () => {
     const result = formSchema.safeParse(formData.value);
-    console.log('result', result)
-    console.log('Dados do formulário:', formData.value);
 
     if (!result.success) {
         errors.value = Object.fromEntries(
-            Object.entries(result.error.flatten().fieldErrors).map(([key, value]) => [key, value?.[0] || ''])
+            Object.entries(result.error.flatten().fieldErrors).map(
+                ([key, value]) => [key, value?.[0] || '']
+            )
         );
-    } else {
-        // Dados válidos, prosseguir com o envio
+        return;
     }
+
+    isLoading.value = true;
+
+    // Simula o envio e mostra o modal
+    setTimeout(() => {
+        cardStore.createTask(formData.value);
+        modalValidate.value = true;
+        isLoading.value = false;
+
+        // Esconde o modal após 1.5s
+        setTimeout(() => {
+            modalValidate.value = false;
+            closeModal();
+        }, 2000);
+
+    }, 1500);
+
+
 };
 
-
-
-watch(formData, (newValue) => {
-    console.log('formData', newValue)
-})
 
 const resetForm = () => {
     title.value = '',
         date.value = new Date(),
         selectedTags.value = [],
         selectedTag.value = null
+    description.value = ''
 }
 
 const tagValues: TagWithColor[] = [
@@ -98,8 +116,9 @@ const handleSelect = () => {
 };
 
 onMounted(() => {
-    selectedTags.value = []
-    selectedTag.value = ''
+    resetForm()
+    cardStore.fetchCards();
+
 })
 
 const closeModal = () => {
@@ -110,6 +129,14 @@ const closeModal = () => {
 </script>
 <template>
     <MoleculesModal v-model="props.showModalCreateTask">
+        <MoleculesModalShortModal v-model="modalValidate" :auto-close="1000">
+            <div>
+                <div class="flex flex-col justify-centr items-center">
+                    <NuxtImg src="/img/animationCheck.gif" />
+                    <span>Task criada com sucesso!</span>
+                </div>
+            </div>
+        </MoleculesModalShortModal>
         <main>
             <div>
                 <div class="flex flex-row w-full items-center justify-start text-2xl font-semibold mb-6">
@@ -182,8 +209,9 @@ const closeModal = () => {
                             </div>
                         </section>
 
-                        <div class="  w-full flex flex-row items-center justify-end mt-10 ">
-                            <AtomsButton type="submit" title="Enviar" class="cursor-pointer hover:bg-orange-500" />
+                        <div class=" w-full flex flex-row items-center justify-end mt-10 ">
+                            <AtomsButton type="submit" title="Enviar" :is-loading="isLoading"
+                                class="cursor-pointer hover:bg-orange-500" />
                         </div>
 
                     </form>

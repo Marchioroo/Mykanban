@@ -65,7 +65,7 @@ watch(cardInfo, (newCard) => {
                 class="w-5 h-5" /></div>
 
         <div class=" flex flex-row text-md font-semibold mb-2 text-orange-400">
-            #{{ cardInfo?.id }} - Em progesso
+            #{{ cardInfo?.id }} - {{ useCard.typeTask }}
         </div>
         <div class="flex flex-row w-full h-full font-semibold text-2xl items-center justify-between mb-6">
             <div v-if="!isEditing" class="text-2xl font-semibold">{{ cardInfo?.title }}</div>
@@ -96,7 +96,7 @@ watch(cardInfo, (newCard) => {
                     <div class="flex flex-wrap gap-2  py-2">
                         <div v-for="(tag, index) in cardInfo?.tags" :key="index"
                             class="px-2 py-0.5 text-white rounded-2xl text-xs" :style="{ backgroundColor: tag.color }">
-                            {{ tag.title }}
+                            {{ tag.title || tag.label }}
                         </div>
                     </div>
                 </div>

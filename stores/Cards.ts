@@ -4,6 +4,7 @@ import type { Column, Task } from "~/types/columnInterface";
 export const useCardStore = defineStore("card", {
   state: () => ({
     columns: [] as Column[],
+    typeTask: "" as String,
     taskSelected: undefined as Task | undefined,
   }),
   actions: {
@@ -252,6 +253,26 @@ export const useCardStore = defineStore("card", {
         });
       });
     },
-    async createTask() {},
+    async typeTaskSelected(val: String) {
+      this.typeTask = val;
+    },
+    async createTask(formData: Task) {
+      console.log("val", this.typeTask);
+      console.log("formData", formData);
+
+      this.columns.forEach((e) => {
+        if (String(e.name) === String(this.typeTask)) {
+          e.tasks.push(formData);
+        }
+      });
+    },
+  },
+  getters: {
+    idValueInfoCard: (state) => {
+      const allTasks = state.columns.flatMap((column) => column.tasks);
+      if (allTasks.length === 0) return 0;
+      const lastId = Math.max(...allTasks.map((task) => Number(task.id)));
+      return lastId;
+    },
   },
 });

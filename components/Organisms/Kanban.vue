@@ -47,9 +47,11 @@ function handleSearch(value: string) {
 
 }
 
-const openModal = (id: number) => {
+const openModal = (id: number, val: String) => {
     showModalCard.value = true;
     useCard.findCardSelected(id);
+    useCard.typeTaskSelected(val)
+
 }
 
 const handleCloseModal = (val: boolean) => {
@@ -59,11 +61,14 @@ const handleCloseModal = (val: boolean) => {
 
 const createTask = (val: String) => {
     isCreateTask.value = true
+    useCard.typeTaskSelected(val)
 }
+
 
 onMounted(async () => {
     isLoading.value = true
     await useCard.fetchCards()
+
 })
 </script>
 <template>
@@ -110,7 +115,7 @@ onMounted(async () => {
                     @end="onDragEnd" :animation="200">
                     <template #item="{ element }">
                         <div class=" relative bg-white my-2 p-4 min-h-[200px] rounded-xl cursor-grab select-none shadow-bottom-only mt-4 shadow-md"
-                            @click="openModal(element.id)">
+                            @click="openModal(element.id, column.name)">
                             <div class="text-[#EE6B42] font-bold"># {{ element.id }}</div>
 
                             <div class="flex flex-row justify-between items-start pt-2">
@@ -123,7 +128,7 @@ onMounted(async () => {
                                 <div v-for="(tag, index) in element.tags" :key="index"
                                     class="px-2 py-0.5 text-white rounded-2xl text-xs"
                                     :style="{ backgroundColor: tag.color }">
-                                    {{ tag.title }}
+                                    {{ tag.title || tag.label }}
                                 </div>
                             </div>
 
@@ -144,10 +149,10 @@ onMounted(async () => {
                                     <div class="flex flex-row gap-1 items-center justify-center  ">
                                         <AtomsIconsAnexo />
                                         <span class="text-[#EE6B42] font-semibold">{{ element.users
-                                        }}</span>
+                                            }}</span>
                                         <AtomsIconsComentario />
                                         <span class="text-[#EE6B42] font-semibold">{{ element.users + 2
-                                        }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -162,7 +167,7 @@ onMounted(async () => {
     </div>
     <div v-else>
         <div class="flex flex-col items-center justify-center p-4">
-            <div class="text-lg">Nenhum conteudo encontrado</div>npm
+            <div class="text-lg">Nenhum conteudo encontrado</div>
             <div>
                 <NuxtImg src="/img/kanbanlogo.png" class="w-25 h-25" />
             </div>

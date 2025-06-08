@@ -30,7 +30,7 @@ const closeModal = (val: 'Confirm' | 'Cancel') => {
 </script>
 
 <template>
-    <MoleculesModal v-model="props.showModalConfirm">
+    <MoleculesModalShortModal v-model="props.showModalConfirm">
         <div class="w-full items-center text-2xl flex flex-col mb-10">
             <div>{{ props.title }}</div>
         </div>
@@ -42,6 +42,5 @@ const closeModal = (val: 'Confirm' | 'Cancel') => {
             <AtomsButton title="Cancelar" class="cursor-pointer !bg-red-500 hover:!bg-red-600"
                 @click="closeModal('Cancel')" />
         </div>
-
-    </MoleculesModal>
+    </MoleculesModalShortModal>
 </template>

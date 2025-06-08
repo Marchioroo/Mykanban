@@ -1,5 +1,6 @@
 export interface Tag {
   title: string;
+  label?: string;
   color: string;
 }
 
@@ -10,6 +11,7 @@ export interface Task {
   date: string; // formato ISO ou "YYYY-MM-DD"
   tags?: {
     title: string;
+    label?: string;
     color: string;
   }[];
   users?: number;
